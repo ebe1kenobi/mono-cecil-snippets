@@ -1,4 +1,18 @@
 # Modify a module to change each private/protected to public
+
+# Get All the info of a Class/Enum/... declare in the module
+
+type Will contains all Types, Methods ...
+```
+namespace Patcher
+{
+  public static class MyPlayer
+  {
+    public static void PatchModule(ModuleDefinition baseModule)
+    {
+var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Variant");
+}
+```
 # Modify a module class to add method
 
 Mandatory : always add a return instruction even if the method is empty, else the module will crash at the atching time or in executing or launching
@@ -168,6 +182,51 @@ public enum Pickups
   PlayTagBombArrows,
 }
 ```
+
+# Search for a specific method
+
+Search for GetAwards in Class VersusAwards in namespace TowerFall with return type System.Collections.Generic.List`1<TowerFall.AwardInfo>[] :
+```
+        public static void PatchModule(ModuleDefinition baseModule)
+        {
+var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Variant");
+            method = type.Methods.Single(m => m.FullName == "System.Collections.Generic.List`1<TowerFall.AwardInfo>[] TowerFall.VersusAwards::GetAwards(TowerFall.MatchSettings,TowerFall.MatchStats[])");
+
+            method = type.Methods.Single(m => m.FullName == "System.Void TowerFall.Variant::Clean(System.Int32)");
+            method = type.Methods.Single(m => m.FullName == "System.Boolean TowerFall.Variant::get_AllTrue()");
+
+            try {
+                method = type.Methods.Single(m => m.FullName.Contains("System.Void TowerFall.TFCommands::<Init>b__4(System.String[])"));
+            }
+            catch (System.InvalidOperationException)
+            {
+                var subType = type.NestedTypes.Single(st => st.FullName == "TowerFall.TFCommands/<>c");
+                method = subType.Methods.Single(m => m.FullName.Contains("System.Void TowerFall.TFCommands/<>c::<Init>b__0_4(System.String[])"));
+            }
+}
+  ```
+To know the String with the full name of the methods, you can output int the console all type.Methods and look fo the one you want.
+
+# Navigate threw the instruction of a method
+```
+        public static void PatchModule(ModuleDefinition baseModule)
+        {
+var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Variant");
+            method = type.Methods.Single(m => m.FullName == "System.Collections.Generic.List`1<TowerFall.AwardInfo>[] TowerFall.VersusAwards::GetAwards(TowerFall.MatchSettings,TowerFall.MatchStats[])");
+            instructions = method.Body.Instructions.ToList();
+            instructions.ForEach(i => ChangeFoursToEights(i));
+}
+```
+
+# Search for a Instruction and replace it
+```
+            if (i.OpCode.Code == Code.Ldc_I4_4)
+            {
+                i.OpCode = OpCodes.Ldc_I4_8;
+            }
+```
+
+List of all the opcaode in the class Mono.Cecil.Cil.OpCodes
 
 # static method issue
 
