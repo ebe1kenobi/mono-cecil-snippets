@@ -264,6 +264,20 @@ var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Vari
 
 List of all the opcaode in the class Mono.Cecil.Cil.OpCodes
 
-# static method issue
+# Problem / Error
+## Add a new Static method (problem)
 
+If I want to 
+- Add a static method M.A in a class N which extend class M and A don't exists in M
+- Can I use N.A in A ? To verify (in my memory , no, visual studio will not compile), I need to add the method A in M first, patch the exe, and then visual can compile. But after the patcher will throw an error
+  - My exp :  
+```
+class M {}
+class N : M {
+  public void static A() {}
+}
+```
 
+# Error while patching a exe throw a nullreference exption on an method which use a instruction with a Enumerator
+
+TODO
