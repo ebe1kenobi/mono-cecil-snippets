@@ -1,4 +1,40 @@
-# Modify a module to change each private/protected to public
+# Add extension to Mono.cecil to get all nested types
+
+```
+using System.Collections.Generic;
+using System.Linq;
+using Mono.Cecil;
+
+namespace Patcher {
+  static class CecilExtensions {
+    public static IEnumerable<TypeDefinition> AllNestedTypes(this TypeDefinition type) {
+      yield return type;
+      foreach (TypeDefinition nested in type.NestedTypes) {
+        foreach (TypeDefinition moreNested in AllNestedTypes(nested)) {
+          yield return moreNested;
+        }
+      }
+    }
+
+    public static IEnumerable<TypeDefinition> AllNestedTypes(this ModuleDefinition module) {
+      return module.Types.SelectMany(AllNestedTypes);
+    }
+
+    public static string Signature(this MethodReference method) {
+      return string.Format("{0}({1})", method.Name, string.Join(", ", method.Parameters.Select(p => p.ParameterType)));
+    }
+  }
+}
+
+```
+
+# Unsealed a module : Modify a module to change each private/protected to public
+
+todo
+
+# Modify a module to add new class/method/Field class/instance class...
+
+todo
 
 # Get All the info of a Class/Enum/... declare in the module
 
