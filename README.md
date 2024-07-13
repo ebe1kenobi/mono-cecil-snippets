@@ -254,6 +254,24 @@ var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Vari
 }
 ```
 
+# display all instruction of a method
+```
+public static void PatchModule(ModuleDefinition baseModule)
+{
+  var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.VersusModeButton");
+  foreach (MethodDefinition m in type.Methods)
+  {
+    Console.WriteLine(m.FullName);
+  }
+  var method = type.Methods.Single(m => m.FullName == "System.Void TowerFall.VersusModeButton::Update()");
+  var instructions = method.Body.Instructions.ToList();
+  foreach (Instruction i in instructions)
+  {
+    Console.WriteLine(i.ToString());
+  }
+  //instructions.ForEach(i => ChangeFoursToEights(i));
+}
+```
 # Search for a Instruction and replace it
 ```
             if (i.OpCode.Code == Code.Ldc_I4_4)
