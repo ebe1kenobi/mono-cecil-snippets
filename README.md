@@ -119,6 +119,13 @@ namespace Patcher
       //type.Fields.Add(new FieldDefinition("PlayTagTimer", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(System.Timers.Timer))));
       type.Fields.Add(new FieldDefinition("PlayTagCountDown", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(int))));
       type.Fields.Add(new FieldDefinition("creationTime", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(DateTime))));
+
+      var imageType = baseModule.Types.FirstOrDefault(t => t.FullName == "Monocle.Image");
+      if (imageType == null)
+      {
+        throw new InvalidOperationException("Type Monocle.Image not found.");
+      }
+      var imageTypeReference = baseModule.ImportReference(imageType);
     }
   }
 }
