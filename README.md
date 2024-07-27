@@ -147,6 +147,60 @@ type.Fields.Add(new FieldDefinition("PlayTagCountDown", Mono.Cecil.FieldAttribut
 
 type.Fields.Add(new FieldDefinition("creationTime", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(DateTime))));
 
+# Modify a class to add a field and initialize this field
+```
+
+namespace Patcher
+{
+  public static class MyOptions
+  {
+    public static void PatchModule(ModuleDefinition baseModule)
+    {
+      var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Options");
+      type.Fields.Add(new FieldDefinition("EnablePlayTagChestTreasure", Mono.Cecil.FieldAttributes.Public , baseModule.ImportReference(typeof(Boolean))));
+      type.Fields.Add(new FieldDefinition("DelayGameTagPlayTagCountDown", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(int))));
+      FieldDefinition DelayPickupPlayTagCountDown = new FieldDefinition("DelayPickupPlayTagCountDown", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(int)));
+      ModifyInstanceConstructor(baseModule, type, DelayPickupPlayTagCountDown);
+      type.Fields.Add(DelayPickupPlayTagCountDown);
+    }
+
+    private static void ModifyInstanceConstructor(ModuleDefinition module, TypeDefinition type, FieldDefinition field)
+    {
+      // Find or create an instance constructor (.ctor)
+      var ctor = type.Methods.FirstOrDefault(m => m.Name == ".ctor" && m.IsConstructor);
+      if (ctor == null)
+      {
+        // If no instance constructor exists, create one
+        ctor = new MethodDefinition(
+            ".ctor",
+            MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+            module.TypeSystem.Void);
+
+        type.Methods.Add(ctor);
+
+        var il = ctor.Body.GetILProcessor();
+        il.Append(il.Create(OpCodes.Ldarg_0));  // Load "this"
+        il.Append(il.Create(OpCodes.Call, module.ImportReference(typeof(object).GetConstructor(new Type[0]))));  // Call base constructor
+        il.Append(il.Create(OpCodes.Ret));
+      }
+
+      // Insert IL to initialize the field
+      var ilProcessor = ctor.Body.GetILProcessor();
+      var returnInstruction = ctor.Body.Instructions.Last(i => i.OpCode == OpCodes.Ret);
+
+      // Load "this" onto the evaluation stack
+      ilProcessor.InsertBefore(returnInstruction, ilProcessor.Create(OpCodes.Ldarg_0));
+
+      // Load the initial value (e.g., 15) onto the evaluation stack
+      ilProcessor.InsertBefore(returnInstruction, ilProcessor.Create(OpCodes.Ldc_I4, 15));
+
+      // Store the value in the instance field
+      ilProcessor.InsertBefore(returnInstruction, ilProcessor.Create(OpCodes.Stfld, field));
+    }
+  }
+}
+```
+
 # Modify a module to add new value in an enum
 ```
 public enum Pickups
