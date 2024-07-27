@@ -157,8 +157,6 @@ namespace Patcher
     public static void PatchModule(ModuleDefinition baseModule)
     {
       var type = baseModule.AllNestedTypes().Single(t => t.FullName == "TowerFall.Options");
-      type.Fields.Add(new FieldDefinition("EnablePlayTagChestTreasure", Mono.Cecil.FieldAttributes.Public , baseModule.ImportReference(typeof(Boolean))));
-      type.Fields.Add(new FieldDefinition("DelayGameTagPlayTagCountDown", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(int))));
       FieldDefinition DelayPickupPlayTagCountDown = new FieldDefinition("DelayPickupPlayTagCountDown", Mono.Cecil.FieldAttributes.Public, baseModule.ImportReference(typeof(int)));
       ModifyInstanceConstructor(baseModule, type, DelayPickupPlayTagCountDown);
       type.Fields.Add(DelayPickupPlayTagCountDown);
